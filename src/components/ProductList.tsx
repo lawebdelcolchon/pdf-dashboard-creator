@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Edit } from "lucide-react";
+import { FileText, Edit, Save, ImagePlus } from "lucide-react";
 import PDFPreviewDialog from "./PDFPreviewDialog";
+import EditProductDialog from "./EditProductDialog";
 
 interface Product {
   id: string;
@@ -18,6 +19,7 @@ interface ProductListProps {
 const ProductList = ({ searchTerm }: ProductListProps) => {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Mock data - replace with actual data later
   const products: Product[] = [
@@ -33,7 +35,6 @@ const ProductList = ({ searchTerm }: ProductListProps) => {
       price: 149.99,
       image: "/placeholder.svg",
     },
-    // Add more mock products as needed
   ];
 
   const filteredProducts = products.filter(
@@ -48,6 +49,10 @@ const ProductList = ({ searchTerm }: ProductListProps) => {
         ? prev.filter((id) => id !== productId)
         : [...prev, productId]
     );
+  };
+
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
   };
 
   return (
@@ -93,8 +98,12 @@ const ProductList = ({ searchTerm }: ProductListProps) => {
               <p className="text-2xl font-bold">${product.price}</p>
               <p className="text-sm text-muted-foreground">ID: {product.id}</p>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
+            <CardFooter className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => handleEdit(product)}
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Button>
@@ -107,6 +116,16 @@ const ProductList = ({ searchTerm }: ProductListProps) => {
         open={showPDFPreview}
         onOpenChange={setShowPDFPreview}
         products={products.filter((p) => selectedProducts.includes(p.id))}
+      />
+
+      <EditProductDialog
+        product={editingProduct}
+        open={!!editingProduct}
+        onOpenChange={(open) => !open && setEditingProduct(null)}
+        onSuccess={() => {
+          setEditingProduct(null);
+          // Here you would typically refresh the products list
+        }}
       />
     </div>
   );
